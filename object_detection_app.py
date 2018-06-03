@@ -66,9 +66,11 @@ def worker(input_q, output_q):
     with detection_graph.as_default():
         od_graph_def = tf.GraphDef()
         with tf.gfile.GFile(PATH_TO_CKPT, 'rb') as fid:
+            print('Loading tensorflow model...')
             serialized_graph = fid.read()
             od_graph_def.ParseFromString(serialized_graph)
             tf.import_graph_def(od_graph_def, name='')
+            print('Tensorflow model loaded.')
 
         sess = tf.Session(graph=detection_graph)
 
@@ -88,11 +90,11 @@ if __name__ == '__main__':
     parser.add_argument('-src', '--source', dest='video_source', type=int,
                         default=0, help='Device index of the camera.')
     parser.add_argument('-wd', '--width', dest='width', type=int,
-                        default=480, help='Width of the frames in the video stream.')
+                        default=1024, help='Width of the frames in the video stream.')
     parser.add_argument('-ht', '--height', dest='height', type=int,
-                        default=360, help='Height of the frames in the video stream.')
+                        default=960, help='Height of the frames in the video stream.')
     parser.add_argument('-num-w', '--num-workers', dest='num_workers', type=int,
-                        default=2, help='Number of workers.')
+                        default=1, help='Number of workers.')
     parser.add_argument('-q-size', '--queue-size', dest='queue_size', type=int,
                         default=5, help='Size of the queue.')
     args = parser.parse_args()
@@ -109,6 +111,7 @@ if __name__ == '__main__':
                                       height=args.height).start()
     fps = FPS().start()
 
+    print('Video started...')
     while True:  # fps._numFrames < 120
         frame = video_capture.read()
         input_q.put(frame)
